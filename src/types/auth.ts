@@ -5,7 +5,13 @@ export type AuthUser = {
   email: string;
   firstName: string;
   lastName: string;
-  role: AppRole;
+  globalRole: AppRole;
+  activeGroupId: string | null;
+  memberships: Array<{
+    groupId: string;
+    groupName: string;
+    role: AppRole;
+  }>;
 };
 
 export type MeResponse = {

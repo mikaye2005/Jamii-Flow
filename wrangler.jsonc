@@ -21,8 +21,8 @@
 		{
 			"binding": "DB",
 			"database_name": "jamii-flow-db",
-			"database_id": "00000000-0000-0000-0000-000000000000",
-			"preview_database_id": "00000000-0000-0000-0000-000000000000",
+			"database_id": "57940809-01ce-4173-9658-10e370350f98",
+			"preview_database_id": "57940809-01ce-4173-9658-10e370350f98",
 			"migrations_dir": "worker/db/migrations"
 		}
 	],
@@ -30,7 +30,8 @@
 		"MPESA_BASE_URL": "https://sandbox.safaricom.co.ke",
 		"MPESA_SHORTCODE": "174379",
 		"MPESA_CALLBACK_URL": "https://your-domain.example/api/payments/mpesa/callback",
-		"MPESA_CALLBACK_IP_ALLOWLIST": ""
+		"MPESA_CALLBACK_IP_ALLOWLIST": "",
+		"SUPER_ADMIN_EMAILS": ""
 	},
 	/**
 	 * Smart Placement

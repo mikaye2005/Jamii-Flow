@@ -55,6 +55,7 @@ Set public vars in `wrangler.jsonc`:
 - `MPESA_SHORTCODE`
 - `MPESA_CALLBACK_URL` (must point to `/api/payments/mpesa/callback` on your deployed app)
 - `MPESA_CALLBACK_IP_ALLOWLIST` (comma-separated trusted IPs; optional)
+- `SUPER_ADMIN_EMAILS` (comma-separated emails that should have platform-wide super admin access)
 
 Set secrets via CLI (do not commit these):
 - `wrangler secret put MPESA_CONSUMER_KEY`

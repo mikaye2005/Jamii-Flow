@@ -41,6 +41,15 @@ Example response:
 - `POST /api/auth/logout`
   - revokes current session
   - clears session cookie
+- `GET /api/auth/register-groups`
+  - returns active groups for public member signup
+- `POST /api/auth/register`
+  - creates member user, adds group membership, and starts session
+
+Auth response now includes:
+- `globalRole`
+- `activeGroupId`
+- `memberships[]` (group + role context)
 
 ## Phase 5 Groups and Members Endpoints
 - `GET /api/groups`

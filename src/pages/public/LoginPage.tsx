@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { login } from "../../features/auth/api";
@@ -67,6 +68,9 @@ export function LoginPage() {
         {loginMutation.isError ? (
           <small className="text-danger">Login failed. Check your email and password.</small>
         ) : null}
+        <small style={{ color: "var(--color-muted)" }}>
+          New member? <Link to="/signup">Create an account</Link>
+        </small>
       </form>
     </section>
   );

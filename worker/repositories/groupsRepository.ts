@@ -21,6 +21,18 @@ export async function listGroups(db: D1Database): Promise<GroupRecord[]> {
   return result.results ?? [];
 }
 
+export async function listActiveGroupsPublic(db: D1Database): Promise<GroupRecord[]> {
+  const result = await db
+    .prepare(
+      `SELECT id, name, code, description, default_currency, status, created_at
+       FROM groups
+       WHERE status = 'ACTIVE'
+       ORDER BY name ASC`,
+    )
+    .all<GroupRecord>();
+  return result.results ?? [];
+}
+
 export async function findGroupById(db: D1Database, id: string): Promise<GroupRecord | null> {
   const result = await db
     .prepare(

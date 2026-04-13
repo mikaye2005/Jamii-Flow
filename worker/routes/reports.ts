@@ -4,11 +4,15 @@ import {
   dashboardSummaryController,
   groupPerformanceController,
 } from "../controllers/reportsController";
-import { requireAuth } from "../middlewares/authMiddleware";
+import { requireAuth, requireOptionalGroupAccessFromQuery } from "../middlewares/authMiddleware";
 
 export const reportsRoutes = new Hono<{ Bindings: Env; Variables: { authUserId: string } }>();
 
 reportsRoutes.use("*", requireAuth);
-reportsRoutes.get("/summary", dashboardSummaryController);
-reportsRoutes.get("/collection-trend", collectionTrendController);
+reportsRoutes.get("/summary", requireOptionalGroupAccessFromQuery("groupId"), dashboardSummaryController);
+reportsRoutes.get(
+  "/collection-trend",
+  requireOptionalGroupAccessFromQuery("groupId"),
+  collectionTrendController,
+);
 reportsRoutes.get("/group-performance", groupPerformanceController);

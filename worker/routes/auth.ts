@@ -1,16 +1,23 @@
 import { Hono } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
-import { loginSchema } from "../../shared/schemas/auth";
+import { loginSchema, registerSchema } from "../../shared/schemas/auth";
 import { SESSION_COOKIE_NAME, requireAuth } from "../middlewares/authMiddleware";
 import {
   getAuthenticatedUserBySessionToken,
+  listSignupGroups,
   loginWithEmailPassword,
+  registerMemberAccount,
   logoutBySessionToken,
 } from "../services/authService";
 import { fail } from "../utils/http";
 import { ok } from "../utils/http";
 
 export const authRoutes = new Hono<{ Bindings: Env; Variables: { authUserId: string } }>();
+
+authRoutes.get("/register-groups", async (c) => {
+  const groups = await listSignupGroups(c.env.DB);
+  return ok(c, { groups });
+});
 
 authRoutes.post("/login", async (c) => {
   const body = await c.req.json().catch(() => null);
@@ -19,7 +26,7 @@ authRoutes.post("/login", async (c) => {
     return fail(c, "Invalid login payload.", 400, "INVALID_PAYLOAD");
   }
 
-  const result = await loginWithEmailPassword(c.env.DB, parsed.data);
+  const result = await loginWithEmailPassword(c.env.DB, parsed.data, c.env);
   if (!result) {
     return fail(c, "Invalid email or password.", 401, "INVALID_CREDENTIALS");
   }
@@ -41,7 +48,7 @@ authRoutes.get("/me", requireAuth, async (c) => {
     return fail(c, "Authentication required.", 401, "UNAUTHENTICATED");
   }
 
-  const authUser = await getAuthenticatedUserBySessionToken(c.env.DB, sessionToken);
+  const authUser = await getAuthenticatedUserBySessionToken(c.env.DB, sessionToken, c.env);
   if (!authUser) {
     return fail(c, "Invalid session.", 401, "INVALID_SESSION");
   }
@@ -57,4 +64,30 @@ authRoutes.post("/logout", async (c) => {
 
   deleteCookie(c, SESSION_COOKIE_NAME, { path: "/" });
   return ok(c, { loggedOut: true });
+});
+
+authRoutes.post("/register", async (c) => {
+  const body = await c.req.json().catch(() => null);
+  const parsed = registerSchema.safeParse(body);
+  if (!parsed.success) {
+    return fail(c, "Invalid signup payload.", 400, "INVALID_SIGNUP_PAYLOAD");
+  }
+
+  const result = await registerMemberAccount(c.env.DB, parsed.data);
+  if ("error" in result) {
+    if (result.error === "EMAIL_ALREADY_EXISTS") {
+      return fail(c, "This email is already registered.", 409, "EMAIL_ALREADY_EXISTS");
+    }
+    return fail(c, "Selected group is not available.", 404, "GROUP_NOT_AVAILABLE");
+  }
+
+  setCookie(c, SESSION_COOKIE_NAME, result.sessionToken, {
+    httpOnly: true,
+    secure: new URL(c.req.url).protocol === "https:",
+    sameSite: "Lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  });
+
+  return ok(c, { user: result.authUser }, 201);
 });

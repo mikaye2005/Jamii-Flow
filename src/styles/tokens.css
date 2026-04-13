@@ -1,9 +1,11 @@
 :root {
   --color-bg: #f1f5f9;
   --color-surface: #ffffff;
+  --color-surface-soft: #f8fafc;
   --color-text: #0f172a;
   --color-muted: #64748b;
   --color-border: #e2e8f0;
+  --color-ring: rgba(51, 130, 246, 0.35);
   --color-primary: #0f9d8a;
   --color-primary-dark: #0b7f70;
   --color-success: #16a34a;
@@ -14,8 +16,24 @@
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
+  --control-height: 40px;
+  --transition-fast: 120ms ease;
   --shadow-sm: 0 2px 10px rgba(15, 23, 42, 0.06);
   --shadow-md: 0 8px 30px rgba(15, 23, 42, 0.08);
   --font-primary: "Manrope", "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-heading: "Sora", "Manrope", "Inter", "Segoe UI", sans-serif;
+}
+
+[data-theme="dark"] {
+  --color-bg: #0b1220;
+  --color-surface: #111a2b;
+  --color-surface-soft: #0f1728;
+  --color-text: #e2e8f0;
+  --color-muted: #94a3b8;
+  --color-border: #243247;
+  --color-ring: rgba(56, 189, 248, 0.35);
+  --sidebar-grad-start: #0b3b5c;
+  --sidebar-grad-end: #116b60;
+  --shadow-sm: 0 2px 12px rgba(2, 6, 23, 0.5);
+  --shadow-md: 0 14px 30px rgba(2, 6, 23, 0.55);
 }

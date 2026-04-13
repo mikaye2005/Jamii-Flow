@@ -4,11 +4,11 @@ import {
   listMembersByGroupController,
   updateMemberController,
 } from "../controllers/membersController";
-import { requireAuth } from "../middlewares/authMiddleware";
+import { requireAuth, requireGroupAccessFromBody, requireGroupAccessFromQuery } from "../middlewares/authMiddleware";
 
 export const membersRoutes = new Hono<{ Bindings: Env; Variables: { authUserId: string } }>();
 
 membersRoutes.use("*", requireAuth);
-membersRoutes.get("/", listMembersByGroupController);
-membersRoutes.post("/", createMemberController);
+membersRoutes.get("/", requireGroupAccessFromQuery("groupId"), listMembersByGroupController);
+membersRoutes.post("/", requireGroupAccessFromBody("groupId"), createMemberController);
 membersRoutes.patch("/:membershipId", updateMemberController);
