@@ -1,12 +1,16 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { logout } from "../features/auth/api";
+import { listMyNotifications } from "../features/reminders/api";
 import { useAuth } from "../features/auth/useAuth";
 import { hasMinimumRole } from "../lib/permissions";
 
 const navItems = [
   { to: "/app/dashboard", label: "Dashboard", icon: "DB" },
+  { to: "/app/super-admin", label: "Super Admin", icon: "SA" },
   { to: "/app/my-portal", label: "My Portal", icon: "ME" },
+  { to: "/app/notifications", label: "Notifications", icon: "NT" },
+  { to: "/app/profile", label: "Profile", icon: "PR" },
   { to: "/app/groups", label: "Groups", icon: "GR" },
   { to: "/app/members", label: "Members", icon: "MB" },
   { to: "/app/contributions", label: "Contributions", icon: "CT" },
@@ -28,6 +32,15 @@ export function AppLayout() {
   });
 
   const user = authQuery.data?.user;
+  const notificationsQuery = useQuery({
+    queryKey: ["notifications", "me"],
+    queryFn: listMyNotifications,
+    enabled: Boolean(user),
+    refetchInterval: 30000,
+  });
+  const unreadNotifications = (notificationsQuery.data?.notifications ?? []).filter(
+    (notification) => notification.status === "UNREAD",
+  ).length;
   const isPublicRoute =
     location.pathname === "/" || location.pathname === "/login" || location.pathname === "/signup";
 
@@ -49,6 +62,10 @@ export function AppLayout() {
 
     if (item.to === "/app/groups" || item.to === "/app/members" || item.to === "/app/operations") {
       return user.memberships.some((membership) => hasMinimumRole(membership.role, "GROUP_ADMIN"));
+    }
+
+    if (item.to === "/app/super-admin") {
+      return false;
     }
 
     if (item.to === "/app/payments" || item.to === "/app/receipts") {
@@ -78,6 +95,9 @@ export function AppLayout() {
             >
               <span className="side-nav__icon">{item.icon}</span>
               <span>{item.label}</span>
+              {item.to === "/app/notifications" && unreadNotifications > 0 ? (
+                <span className="side-nav__badge">{unreadNotifications}</span>
+              ) : null}
             </NavLink>
           ))}
         </nav>
@@ -101,6 +121,18 @@ export function AppLayout() {
         </div>
         <Outlet />
       </main>
+      <nav className="mobile-nav">
+        {filteredNavItems.slice(0, 5).map((item) => (
+          <NavLink
+            key={`mobile-${item.to}`}
+            to={item.to}
+            className={({ isActive }) => `mobile-nav__item${isActive ? " active" : ""}`}
+          >
+            <span className="mobile-nav__icon">{item.icon}</span>
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
+      </nav>
     </div>
   );
 }

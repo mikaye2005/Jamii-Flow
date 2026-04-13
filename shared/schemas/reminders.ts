@@ -17,6 +17,13 @@ export const createNotificationSchema = z.object({
   payloadJson: z.string().optional(),
 });
 
+export const createGroupBroadcastSchema = z.object({
+  groupId: z.string().min(1),
+  type: z.string().min(2).max(60).default("GROUP_UPDATE"),
+  title: z.string().min(2).max(120),
+  message: z.string().min(2).max(500),
+});
+
 export const createAuditLogSchema = z.object({
   groupId: z.string().optional(),
   action: z.string().min(2).max(120),
@@ -28,4 +35,5 @@ export const createAuditLogSchema = z.object({
 
 export type CreateReminderInput = z.infer<typeof createReminderSchema>;
 export type CreateNotificationInput = z.infer<typeof createNotificationSchema>;
+export type CreateGroupBroadcastInput = z.infer<typeof createGroupBroadcastSchema>;
 export type CreateAuditLogInput = z.infer<typeof createAuditLogSchema>;

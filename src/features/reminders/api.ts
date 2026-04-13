@@ -87,6 +87,28 @@ export function listNotifications(userId: string) {
   );
 }
 
+export function listMyNotifications() {
+  return apiGet<{ notifications: Notification[] }>("/api/operations/notifications/me");
+}
+
+export function markNotificationRead(notificationId: string) {
+  return apiPost<{ updated: boolean }, { notificationId: string }>("/api/operations/notifications/read", {
+    notificationId,
+  });
+}
+
+export function broadcastGroupNotification(payload: {
+  groupId: string;
+  type: string;
+  title: string;
+  message: string;
+}) {
+  return apiPost<{ created: boolean; recipients: number }, typeof payload>(
+    "/api/operations/notifications/broadcast",
+    payload,
+  );
+}
+
 export function listAuditLogs(groupId: string) {
   return apiGet<{ auditLogs: AuditLog[] }>(
     `/api/operations/audit-logs?groupId=${encodeURIComponent(groupId)}`,

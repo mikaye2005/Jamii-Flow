@@ -1,11 +1,14 @@
 import { Hono } from "hono";
 import {
+  broadcastGroupNotificationController,
   createAuditLogController,
   createNotificationController,
   createReminderController,
   listArrearsController,
   listAuditLogsController,
   listNotificationsController,
+  listMyNotificationsController,
+  markNotificationReadController,
   listPaymentWebhookLogsController,
   listRemindersController,
 } from "../controllers/operationsController";
@@ -21,7 +24,14 @@ operationsRoutes.get("/reminders", requireGroupAccessFromQuery("groupId"), listR
 operationsRoutes.post("/reminders", requireGroupAccessFromBody("groupId"), createReminderController);
 
 operationsRoutes.get("/notifications", listNotificationsController);
+operationsRoutes.get("/notifications/me", listMyNotificationsController);
+operationsRoutes.post("/notifications/read", markNotificationReadController);
 operationsRoutes.post("/notifications", createNotificationController);
+operationsRoutes.post(
+  "/notifications/broadcast",
+  requireGroupAccessFromBody("groupId"),
+  broadcastGroupNotificationController,
+);
 
 operationsRoutes.get("/audit-logs", requireGroupAccessFromQuery("groupId"), listAuditLogsController);
 operationsRoutes.post("/audit-logs", createAuditLogController);

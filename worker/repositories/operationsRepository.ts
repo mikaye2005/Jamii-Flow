@@ -1,5 +1,6 @@
 import type {
   CreateAuditLogInput,
+  CreateGroupBroadcastInput,
   CreateNotificationInput,
   CreateReminderInput,
 } from "../../shared/schemas/reminders";
@@ -159,6 +160,26 @@ export async function listNotificationsByUser(
   return result.results ?? [];
 }
 
+export async function markNotificationRead(
+  db: D1Database,
+  notificationId: string,
+  userId: string,
+): Promise<boolean> {
+  const result = await db
+    .prepare(
+      `UPDATE notifications
+       SET status = 'READ',
+           read_at = COALESCE(read_at, CURRENT_TIMESTAMP),
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?1
+         AND user_id = ?2`,
+    )
+    .bind(notificationId, userId)
+    .run();
+
+  return Number(result.meta.changes ?? 0) > 0;
+}
+
 export async function createAuditLog(
   db: D1Database,
   input: CreateAuditLogInput,
@@ -194,4 +215,32 @@ export async function listAuditLogsByGroup(db: D1Database, groupId: string): Pro
     .bind(groupId)
     .all<AuditLogRecord>();
   return result.results ?? [];
+}
+
+export async function createGroupBroadcastNotifications(
+  db: D1Database,
+  input: CreateGroupBroadcastInput,
+): Promise<number> {
+  const members = await db
+    .prepare(
+      `SELECT DISTINCT gm.user_id
+       FROM group_memberships gm
+       WHERE gm.group_id = ?1
+         AND gm.membership_status = 'ACTIVE'`,
+    )
+    .bind(input.groupId)
+    .all<{ user_id: string }>();
+
+  let created = 0;
+  for (const member of members.results ?? []) {
+    await createNotification(db, {
+      userId: member.user_id,
+      groupId: input.groupId,
+      type: input.type,
+      title: input.title,
+      message: input.message,
+    });
+    created += 1;
+  }
+  return created;
 }

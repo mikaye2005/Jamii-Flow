@@ -10,10 +10,13 @@ import { GroupsPage } from "../pages/system/GroupsPage";
 import { MembersPage } from "../pages/system/MembersPage";
 import { MemberPortalPage } from "../pages/system/MemberPortalPage";
 import { NotFoundPage } from "../pages/system/NotFoundPage";
+import { NotificationsPage } from "../pages/system/NotificationsPage";
 import { OperationsPage } from "../pages/system/OperationsPage";
 import { PaymentsPage } from "../pages/system/PaymentsPage";
 import { ReceiptsPage } from "../pages/system/ReceiptsPage";
 import { ReportsPage } from "../pages/system/ReportsPage";
+import { MemberSettingsPage } from "../pages/system/MemberSettingsPage";
+import { SuperAdminPage } from "../pages/system/SuperAdminPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 
 export const router = createBrowserRouter([
@@ -33,6 +36,9 @@ export const router = createBrowserRouter([
           { path: "groups", element: <GroupsPage /> },
           { path: "members", element: <MembersPage /> },
           { path: "my-portal", element: <MemberPortalPage /> },
+          { path: "notifications", element: <NotificationsPage /> },
+          { path: "profile", element: <MemberSettingsPage /> },
+          { path: "super-admin", element: <SuperAdminPage /> },
           { path: "contributions", element: <ContributionsPage /> },
           { path: "payments", element: <PaymentsPage /> },
           { path: "receipts", element: <ReceiptsPage /> },

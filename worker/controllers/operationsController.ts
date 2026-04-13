@@ -1,5 +1,6 @@
 import type { Context } from "hono";
 import {
+  createGroupBroadcastSchema,
   createAuditLogSchema,
   createNotificationSchema,
   createReminderSchema,
@@ -7,12 +8,14 @@ import {
 import {
   createAuditLogRecord,
   createNotificationRecord,
+  createGroupBroadcastNotificationRecord,
   createReminderRecord,
   getArrearsByGroup,
   getAuditLogsByGroup,
   getPaymentWebhookLogs,
   getNotificationsByUser,
   getRemindersByGroup,
+  markNotificationAsRead,
 } from "../services/operationsService";
 import { fail, ok } from "../utils/http";
 
@@ -53,6 +56,28 @@ export async function listNotificationsController(c: Context<{ Bindings: Env }>)
   return ok(c, { notifications });
 }
 
+export async function listMyNotificationsController(
+  c: Context<{ Bindings: Env; Variables: { authUserId: string } }>,
+) {
+  const notifications = await getNotificationsByUser(c.env.DB, c.get("authUserId"));
+  return ok(c, { notifications });
+}
+
+export async function markNotificationReadController(
+  c: Context<{ Bindings: Env; Variables: { authUserId: string } }>,
+) {
+  const payload = (await c.req.json().catch(() => null)) as { notificationId?: string } | null;
+  const notificationId = typeof payload?.notificationId === "string" ? payload.notificationId : "";
+  if (!notificationId) {
+    return fail(c, "notificationId is required.", 400, "NOTIFICATION_ID_REQUIRED");
+  }
+  const updated = await markNotificationAsRead(c.env.DB, notificationId, c.get("authUserId"));
+  if (!updated) {
+    return fail(c, "Notification not found.", 404, "NOTIFICATION_NOT_FOUND");
+  }
+  return ok(c, { updated: true });
+}
+
 export async function createNotificationController(c: Context<{ Bindings: Env }>) {
   const payload = await c.req.json().catch(() => null);
   const parsed = createNotificationSchema.safeParse(payload);
@@ -61,6 +86,16 @@ export async function createNotificationController(c: Context<{ Bindings: Env }>
   }
   await createNotificationRecord(c.env.DB, parsed.data);
   return ok(c, { created: true }, 201);
+}
+
+export async function broadcastGroupNotificationController(c: Context<{ Bindings: Env }>) {
+  const payload = await c.req.json().catch(() => null);
+  const parsed = createGroupBroadcastSchema.safeParse(payload);
+  if (!parsed.success) {
+    return fail(c, "Invalid broadcast payload.", 400, "INVALID_BROADCAST_PAYLOAD");
+  }
+  const recipients = await createGroupBroadcastNotificationRecord(c.env.DB, parsed.data);
+  return ok(c, { created: true, recipients }, 201);
 }
 
 export async function listAuditLogsController(c: Context<{ Bindings: Env }>) {

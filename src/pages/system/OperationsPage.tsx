@@ -6,10 +6,11 @@ import { DataTable } from "../../components/DataTable";
 import { StatusBadge } from "../../components/StatusBadge";
 import { listGroups } from "../../features/groups/api";
 import {
+  broadcastGroupNotification,
   createReminder,
   listArrears,
   listAuditLogs,
-  listNotifications,
+  listMyNotifications,
   listPaymentWebhookLogs,
   listReminders,
 } from "../../features/reminders/api";
@@ -21,8 +22,15 @@ const reminderSchema = z.object({
   scheduledFor: z.string().min(8),
   channel: z.enum(["SMS", "EMAIL", "WHATSAPP", "IN_APP"]),
 });
+const broadcastSchema = z.object({
+  groupId: z.string().min(1),
+  type: z.string().min(2),
+  title: z.string().min(2),
+  message: z.string().min(2),
+});
 
 type ReminderFormValues = z.infer<typeof reminderSchema>;
+type BroadcastFormValues = z.infer<typeof broadcastSchema>;
 
 export function OperationsPage() {
   const queryClient = useQueryClient();
@@ -36,6 +44,19 @@ export function OperationsPage() {
       reminderType: "OVERDUE",
       scheduledFor: new Date().toISOString().slice(0, 10),
       channel: "SMS",
+    },
+  });
+  const {
+    register: registerBroadcast,
+    handleSubmit: handleBroadcastSubmit,
+    reset: resetBroadcast,
+  } = useForm<BroadcastFormValues>({
+    resolver: zodResolver(broadcastSchema),
+    defaultValues: {
+      groupId: "",
+      type: "GROUP_UPDATE",
+      title: "",
+      message: "",
     },
   });
 
@@ -60,8 +81,8 @@ export function OperationsPage() {
   });
 
   const notificationsQuery = useQuery({
-    queryKey: ["notifications", "usr_demo_admin"],
-    queryFn: () => listNotifications("usr_demo_admin"),
+    queryKey: ["notifications", "me"],
+    queryFn: listMyNotifications,
   });
 
   const webhookLogsQuery = useQuery({
@@ -83,12 +104,24 @@ export function OperationsPage() {
       await queryClient.invalidateQueries({ queryKey: ["arrears", selectedGroupId] });
     },
   });
+  const broadcastMutation = useMutation({
+    mutationFn: broadcastGroupNotification,
+    onSuccess: async (_, payload) => {
+      resetBroadcast({
+        groupId: payload.groupId,
+        type: "GROUP_UPDATE",
+        title: "",
+        message: "",
+      });
+      await queryClient.invalidateQueries({ queryKey: ["notifications", "me"] });
+    },
+  });
 
   return (
     <section>
       <h1 className="page-title">Arrears, Reminders, Notifications</h1>
 
-      <article className="card form-card" style={{ marginBottom: "1rem" }}>
+      <article className="card form-card form-card--wide" style={{ marginBottom: "1rem" }}>
         <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Create Reminder</h2>
         <form className="form-grid" onSubmit={handleSubmit((values) => createReminderMutation.mutate(values))}>
           <label>
@@ -129,6 +162,41 @@ export function OperationsPage() {
           </label>
           <button className="button-primary" type="submit" disabled={createReminderMutation.isPending}>
             {createReminderMutation.isPending ? "Creating..." : "Create Reminder"}
+          </button>
+        </form>
+      </article>
+
+      <article className="card form-card form-card--wide" style={{ marginBottom: "1rem" }}>
+        <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Broadcast Group Notification</h2>
+        <form
+          className="form-grid"
+          onSubmit={handleBroadcastSubmit((values) => broadcastMutation.mutate(values))}
+        >
+          <label>
+            Group
+            <select {...registerBroadcast("groupId")}>
+              <option value="">Select group</option>
+              {(groupsQuery.data?.groups ?? []).map((group) => (
+                <option key={group.id} value={group.id}>
+                  {group.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Type
+            <input {...registerBroadcast("type")} placeholder="GROUP_UPDATE" />
+          </label>
+          <label>
+            Title
+            <input {...registerBroadcast("title")} placeholder="Late payment reminder" />
+          </label>
+          <label>
+            Message
+            <input {...registerBroadcast("message")} placeholder="Please settle pending dues by Friday." />
+          </label>
+          <button className="button-primary" type="submit" disabled={broadcastMutation.isPending}>
+            {broadcastMutation.isPending ? "Sending..." : "Send to Group Members"}
           </button>
         </form>
       </article>
@@ -174,7 +242,7 @@ export function OperationsPage() {
       </article>
 
       <article className="card" style={{ marginBottom: "1rem" }}>
-        <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Notifications (Demo User)</h2>
+        <h2 style={{ marginTop: 0, fontSize: "1rem" }}>Notifications (My Account)</h2>
         <DataTable
           rows={notificationsQuery.data?.notifications ?? []}
           columns={[

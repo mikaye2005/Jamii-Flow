@@ -1,5 +1,6 @@
 import type {
   CreateAuditLogInput,
+  CreateGroupBroadcastInput,
   CreateNotificationInput,
   CreateReminderInput,
 } from "../../shared/schemas/reminders";
@@ -7,10 +8,12 @@ import {
   createAuditLog,
   createNotification,
   createReminder,
+  createGroupBroadcastNotifications,
   listArrearsByGroup,
   listAuditLogsByGroup,
   listNotificationsByUser,
   listRemindersByGroup,
+  markNotificationRead,
   markOverdueDueItems,
 } from "../repositories/operationsRepository";
 import { listPaymentWebhookLogs } from "../repositories/paymentsRepository";
@@ -34,6 +37,17 @@ export function createNotificationRecord(db: D1Database, input: CreateNotificati
 
 export function getNotificationsByUser(db: D1Database, userId: string) {
   return listNotificationsByUser(db, userId);
+}
+
+export function markNotificationAsRead(db: D1Database, notificationId: string, userId: string) {
+  return markNotificationRead(db, notificationId, userId);
+}
+
+export function createGroupBroadcastNotificationRecord(
+  db: D1Database,
+  input: CreateGroupBroadcastInput,
+) {
+  return createGroupBroadcastNotifications(db, input);
 }
 
 export function createAuditLogRecord(
