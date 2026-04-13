@@ -4,13 +4,20 @@ JamiiFlow is a welfare management web application for managing groups, members, 
 
 ## Current Status
 - Phase 1 initialized.
+- Phase 2 foundation initialized.
+- Phase 3 schema and local D1 migrations initialized.
+- Phase 4 authentication shell initialized.
+- Phase 5 groups and members modules initialized.
 - Cloudflare React + TypeScript + Vite starter is deployed.
 - Worker API health endpoint is available at `/api/health`.
 
 ## Tech Stack
 - React + TypeScript + Vite
+- React Router
+- React Hook Form + Zod
+- TanStack Query
 - Cloudflare Workers
-- Planned API framework: Hono
+- API framework: Hono
 - Planned database: D1
 - Planned object storage: R2
 
