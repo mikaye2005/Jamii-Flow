@@ -31,7 +31,7 @@
 		"MPESA_SHORTCODE": "174379",
 		"MPESA_CALLBACK_URL": "https://your-domain.example/api/payments/mpesa/callback",
 		"MPESA_CALLBACK_IP_ALLOWLIST": "",
-		"SUPER_ADMIN_EMAILS": ""
+		"SUPER_ADMIN_EMAILS": "mikaye.collins254@gmail.com"
 	},
 	/**
 	 * Smart Placement
