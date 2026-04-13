@@ -1,73 +1,42 @@
-# React + TypeScript + Vite
+# JamiiFlow
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+JamiiFlow is a welfare management web application for managing groups, members, contributions, payments, receipts, arrears, reminders, reports, and audit trails.
 
-Currently, two official plugins are available:
+## Current Status
+- Phase 1 initialized.
+- Cloudflare React + TypeScript + Vite starter is deployed.
+- Worker API health endpoint is available at `/api/health`.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tech Stack
+- React + TypeScript + Vite
+- Cloudflare Workers
+- Planned API framework: Hono
+- Planned database: D1
+- Planned object storage: R2
 
-## React Compiler
+## Local Development
+1. Install dependencies:
+   - `npm install`
+2. Run local server:
+   - `npm run dev`
+3. Verify:
+   - App: `http://localhost:5173`
+   - API health: `http://localhost:5173/api/health`
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Deploy
+- `npm run deploy`
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Documentation
+- Setup:
+  - `docs/setup/local-setup.md`
+  - `docs/setup/cloudflare-setup.md`
+  - `docs/setup/github-setup.md`
+- Architecture:
+  - `docs/architecture/system-overview.md`
+  - `docs/architecture/page-map.md`
+- Database:
+  - `docs/database/schema.md`
+- API:
+  - `docs/api/endpoints.md`
+- Prompts:
+  - `docs/prompts/cursor-prompts.md`
