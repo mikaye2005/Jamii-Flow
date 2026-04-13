@@ -8,6 +8,12 @@ JamiiFlow is a welfare management web application for managing groups, members, 
 - Phase 3 schema and local D1 migrations initialized.
 - Phase 4 authentication shell initialized.
 - Phase 5 groups and members modules initialized.
+- Phase 6 contributions plans/cycles/due-items foundation initialized.
+- Phase 7 payments and receipts foundation initialized.
+- Phase 8 arrears/reminders/notifications/audit foundation initialized.
+- Phase 9 interactive dashboard and reports foundation initialized.
+- M-Pesa STK push adapter and deposit prompt flow integrated.
+- Callback hardening and webhook log observability integrated.
 - Cloudflare React + TypeScript + Vite starter is deployed.
 - Worker API health endpoint is available at `/api/health`.
 

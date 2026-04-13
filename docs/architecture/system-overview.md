@@ -43,6 +43,28 @@ JamiiFlow is a Cloudflare-native full-stack web app for welfare group operations
   - D1-backed list + create + update API shell
   - frontend list + add-member flow by selected group
 
+## Phase 6 Contributions Foundation
+- Contribution plans API + frontend create/list workflow.
+- Contribution cycles API with due-item generation for active memberships.
+- Due items query endpoint and frontend table view.
+
+## Phase 7 Payments and Receipts Foundation
+- Payments API with receipt generation hook.
+- Payment allocations update due item balances/statuses.
+- Receipts query API and frontend receipts listing page.
+
+## Phase 8 Arrears and Operations Foundation
+- Arrears query pipeline with overdue auto-marking logic.
+- Reminder creation/listing API and reminder center page.
+- Notifications and audit log API shell with list/create capabilities.
+- Consolidated operations dashboard page for arrears/reminders/notifications/audit logs.
+- Added payment webhook logs observability section for M-Pesa callback operations.
+
+## Phase 9 Interactive Dashboard and Reports
+- Dashboard now supports interactive filters (group + months).
+- Reports API for summary, trend, and group performance.
+- Reports page with live filter-driven queries and tabular drilldowns.
+
 ## Deployment Model
 - Single Worker serving frontend assets and `/api/*` endpoints.
 - Progressive enhancement with D1, R2, and cron jobs as phases advance.

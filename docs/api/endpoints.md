@@ -52,3 +52,45 @@ Example response:
 - `PATCH /api/members/:membershipId`
 
 All Phase 5 routes are protected with auth middleware (`requireAuth`).
+
+## Phase 6 Contributions Endpoints
+- `GET /api/contributions/plans?groupId=<group_id>`
+- `POST /api/contributions/plans`
+- `GET /api/contributions/cycles?contributionPlanId=<plan_id>`
+- `POST /api/contributions/cycles`
+- `GET /api/contributions/due-items?contributionCycleId=<cycle_id>`
+
+Cycle creation auto-generates `member_due_items` for active members in the plan's group.
+
+## Phase 7 Payments and Receipts Endpoints
+- `GET /api/payments?groupId=<group_id>`
+- `POST /api/payments`
+- `POST /api/payments/mpesa/stk-push`
+- `POST /api/payments/mpesa/callback` (public webhook)
+- `GET /api/receipts?groupId=<group_id>`
+
+Payment creation currently:
+- creates a `payments` row
+- applies any provided allocations to `member_due_items`
+- auto-generates a `receipts` row with a receipt number
+- M-Pesa STK initiation endpoint calls Safaricom Daraja API when configured
+- Callback endpoint reconciles STK result with payment reference, updates receipt delivery status, writes notification, and writes audit log.
+
+## Phase 8 Operations Endpoints
+- `GET /api/operations/arrears?groupId=<group_id>`
+- `GET /api/operations/reminders?groupId=<group_id>`
+- `POST /api/operations/reminders`
+- `GET /api/operations/notifications?userId=<user_id>`
+- `POST /api/operations/notifications`
+- `GET /api/operations/audit-logs?groupId=<group_id>`
+- `POST /api/operations/audit-logs`
+- `GET /api/operations/payment-webhooks?limit=<optional_number>`
+
+Arrears query auto-runs overdue status marking for due items before returning results.
+
+## Phase 9 Reports Endpoints
+- `GET /api/reports/summary?groupId=<optional_group_id>`
+- `GET /api/reports/collection-trend?months=<n>&groupId=<optional_group_id>`
+- `GET /api/reports/group-performance?months=<n>`
+
+These endpoints power interactive dashboard and reports filters.

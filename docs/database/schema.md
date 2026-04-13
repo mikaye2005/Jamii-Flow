@@ -22,6 +22,7 @@ Primary database for MVP is Cloudflare D1 (SQLite-compatible).
 - audit_logs
 - sessions
 - password_reset_tokens
+- payment_webhook_logs
 
 ## Relationship Summary
 - A `user` can belong to many groups through `group_memberships`.

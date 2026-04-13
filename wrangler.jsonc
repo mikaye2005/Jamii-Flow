@@ -25,7 +25,13 @@
 			"preview_database_id": "00000000-0000-0000-0000-000000000000",
 			"migrations_dir": "worker/db/migrations"
 		}
-	]
+	],
+	"vars": {
+		"MPESA_BASE_URL": "https://sandbox.safaricom.co.ke",
+		"MPESA_SHORTCODE": "174379",
+		"MPESA_CALLBACK_URL": "https://your-domain.example/api/payments/mpesa/callback",
+		"MPESA_CALLBACK_IP_ALLOWLIST": ""
+	},
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

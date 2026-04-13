@@ -6,6 +6,11 @@ const navItems = [
   { to: "/app/dashboard", label: "Dashboard" },
   { to: "/app/groups", label: "Groups" },
   { to: "/app/members", label: "Members" },
+  { to: "/app/contributions", label: "Contributions" },
+  { to: "/app/payments", label: "Payments" },
+  { to: "/app/receipts", label: "Receipts" },
+  { to: "/app/operations", label: "Operations" },
+  { to: "/app/reports", label: "Reports" },
 ];
 
 export function AppLayout() {

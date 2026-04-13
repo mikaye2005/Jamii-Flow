@@ -48,3 +48,30 @@
   - `npm run db:migrate:local`
 - Inspect tables:
   - `npx wrangler d1 execute DB --local --command "SELECT name FROM sqlite_master WHERE type='table';"`
+
+## M-Pesa (Daraja) Configuration
+Set public vars in `wrangler.jsonc`:
+- `MPESA_BASE_URL` (sandbox default provided)
+- `MPESA_SHORTCODE`
+- `MPESA_CALLBACK_URL` (must point to `/api/payments/mpesa/callback` on your deployed app)
+- `MPESA_CALLBACK_IP_ALLOWLIST` (comma-separated trusted IPs; optional)
+
+Set secrets via CLI (do not commit these):
+- `wrangler secret put MPESA_CONSUMER_KEY`
+- `wrangler secret put MPESA_CONSUMER_SECRET`
+- `wrangler secret put MPESA_PASSKEY`
+- `wrangler secret put MPESA_CALLBACK_TOKEN`
+
+After updates:
+1. `npm run cf-typegen`
+2. `npm run dev`
+3. Test M-Pesa deposit flow from `/app/payments` using `Mobile Money`.
+
+Callback verification notes:
+- Daraja callback should hit: `https://<your-domain>/api/payments/mpesa/callback`
+- Callback request should include header `x-callback-token` matching `MPESA_CALLBACK_TOKEN`
+- For successful callbacks, JamiiFlow:
+  - marks related receipt as `SENT`
+  - creates a member notification
+  - creates an audit log entry
+- Every callback is persisted in `payment_webhook_logs` for traceability.
