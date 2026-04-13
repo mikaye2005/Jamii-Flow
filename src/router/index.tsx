@@ -8,6 +8,7 @@ import { ContributionsPage } from "../pages/system/ContributionsPage";
 import { ErrorPage } from "../pages/system/ErrorPage";
 import { GroupsPage } from "../pages/system/GroupsPage";
 import { MembersPage } from "../pages/system/MembersPage";
+import { MemberPortalPage } from "../pages/system/MemberPortalPage";
 import { NotFoundPage } from "../pages/system/NotFoundPage";
 import { OperationsPage } from "../pages/system/OperationsPage";
 import { PaymentsPage } from "../pages/system/PaymentsPage";
@@ -31,6 +32,7 @@ export const router = createBrowserRouter([
           { path: "dashboard", element: <DashboardPage /> },
           { path: "groups", element: <GroupsPage /> },
           { path: "members", element: <MembersPage /> },
+          { path: "my-portal", element: <MemberPortalPage /> },
           { path: "contributions", element: <ContributionsPage /> },
           { path: "payments", element: <PaymentsPage /> },
           { path: "receipts", element: <ReceiptsPage /> },

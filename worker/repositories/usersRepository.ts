@@ -7,6 +7,8 @@ type UserRecord = {
   status: string;
 };
 
+type MemberLoginCandidate = UserRecord;
+
 type CreateUserInput = {
   email: string;
   passwordHash: string;
@@ -74,4 +76,31 @@ export async function createGroupMembership(
     )
     .bind(crypto.randomUUID(), groupId, userId, `M-${Date.now()}`)
     .run();
+}
+
+export async function findUserForMemberLogin(
+  db: D1Database,
+  params: {
+    groupId: string;
+    facilityCode: string;
+    username: string;
+  },
+): Promise<MemberLoginCandidate | null> {
+  const result = await db
+    .prepare(
+      `SELECT u.id, u.email, u.password_hash, u.first_name, u.last_name, u.status
+       FROM users u
+       INNER JOIN group_memberships gm ON gm.user_id = u.id
+       INNER JOIN groups g ON g.id = gm.group_id
+       WHERE gm.group_id = ?1
+         AND gm.membership_status = 'ACTIVE'
+         AND g.status = 'ACTIVE'
+         AND upper(g.code) = upper(?2)
+         AND (lower(u.email) = lower(?3) OR lower(COALESCE(gm.member_number, '')) = lower(?3))
+       LIMIT 1`,
+    )
+    .bind(params.groupId, params.facilityCode, params.username.trim())
+    .first<MemberLoginCandidate>();
+
+  return result ?? null;
 }

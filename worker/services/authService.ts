@@ -8,6 +8,7 @@ import {
   createUser,
   findUserByEmail,
   findUserById,
+  findUserForMemberLogin,
 } from "../repositories/usersRepository";
 import {
   createSession,
@@ -75,6 +76,9 @@ async function createSessionForUser(db: D1Database, userId: string) {
 }
 
 export async function loginWithEmailPassword(db: D1Database, input: LoginInput, env?: Env | null) {
+  if (!input.email) {
+    return null;
+  }
   const user = await findUserByEmail(db, input.email);
   if (!user || user.status !== "ACTIVE") {
     return null;
@@ -87,6 +91,33 @@ export async function loginWithEmailPassword(db: D1Database, input: LoginInput, 
 
   const sessionToken = await createSessionForUser(db, user.id);
 
+  const authUser = await buildAuthUser(db, { user, env: env ?? null });
+
+  return {
+    sessionToken,
+    authUser,
+  };
+}
+
+export async function loginWithMemberCredentials(db: D1Database, input: LoginInput, env?: Env | null) {
+  if (!input.groupId || !input.facilityCode || !input.username) {
+    return null;
+  }
+  const user = await findUserForMemberLogin(db, {
+    groupId: input.groupId,
+    facilityCode: input.facilityCode,
+    username: input.username,
+  });
+  if (!user || user.status !== "ACTIVE") {
+    return null;
+  }
+
+  const passwordHash = await sha256Hex(input.password);
+  if (passwordHash !== user.password_hash) {
+    return null;
+  }
+
+  const sessionToken = await createSessionForUser(db, user.id);
   const authUser = await buildAuthUser(db, { user, env: env ?? null });
 
   return {

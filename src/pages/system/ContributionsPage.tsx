@@ -17,7 +17,7 @@ const planSchema = z.object({
   groupId: z.string().min(1),
   name: z.string().min(2),
   amountMinor: z.number().int().positive(),
-  currency: z.string().length(3),
+  currency: z.literal("KES"),
   frequency: z.enum(["WEEKLY", "MONTHLY", "ONE_TIME"]),
   dueDay: z.number().int().min(1).max(31),
   graceDays: z.number().int().min(0).max(30),
@@ -177,7 +177,7 @@ export function ContributionsPage() {
           </label>
           <label>
             Currency
-            <input {...registerPlan("currency")} />
+            <input {...registerPlan("currency")} readOnly />
           </label>
           <label>
             Frequency

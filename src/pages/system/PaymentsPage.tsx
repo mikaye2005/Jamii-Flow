@@ -15,7 +15,7 @@ const paymentSchema = z.object({
   paymentMethod: z.enum(["CASH", "BANK_TRANSFER", "MOBILE_MONEY", "CARD", "OTHER"]),
   referenceCode: z.string().optional(),
   amountMinor: z.number().int().positive(),
-  currency: z.string().length(3),
+  currency: z.literal("KES"),
   paymentDate: z.string().min(8),
   notes: z.string().optional(),
 });
@@ -203,7 +203,7 @@ export function PaymentsPage() {
           </label>
           <label>
             Currency
-            <input {...register("currency")} />
+            <input {...register("currency")} readOnly />
           </label>
           <label>
             Payment Date

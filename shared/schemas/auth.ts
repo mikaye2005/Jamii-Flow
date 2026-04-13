@@ -1,10 +1,22 @@
 import { z } from "zod";
 import { APP_ROLES } from "../constants/roles";
 
-export const loginSchema = z.object({
-  email: z.email(),
-  password: z.string().min(8).max(128),
-});
+export const loginSchema = z
+  .object({
+    email: z.email().optional(),
+    groupId: z.string().min(1).optional(),
+    facilityCode: z.string().min(2).max(32).optional(),
+    username: z.string().min(2).max(120).optional(),
+    password: z.string().min(8).max(128),
+  })
+  .refine(
+    (value) =>
+      Boolean(value.email) ||
+      (Boolean(value.groupId) && Boolean(value.facilityCode) && Boolean(value.username)),
+    {
+      message: "Provide either email login or group member login fields.",
+    },
+  );
 
 export const registerSchema = z.object({
   groupId: z.string().min(1),

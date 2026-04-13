@@ -5,6 +5,7 @@ import { SESSION_COOKIE_NAME, requireAuth } from "../middlewares/authMiddleware"
 import {
   getAuthenticatedUserBySessionToken,
   listSignupGroups,
+  loginWithMemberCredentials,
   loginWithEmailPassword,
   registerMemberAccount,
   logoutBySessionToken,
@@ -26,7 +27,9 @@ authRoutes.post("/login", async (c) => {
     return fail(c, "Invalid login payload.", 400, "INVALID_PAYLOAD");
   }
 
-  const result = await loginWithEmailPassword(c.env.DB, parsed.data, c.env);
+  const result = parsed.data.email
+    ? await loginWithEmailPassword(c.env.DB, parsed.data, c.env)
+    : await loginWithMemberCredentials(c.env.DB, parsed.data, c.env);
   if (!result) {
     return fail(c, "Invalid email or password.", 401, "INVALID_CREDENTIALS");
   }

@@ -2,7 +2,10 @@ import { apiGet, apiPost } from "../../lib/apiClient";
 import type { MeResponse } from "../../types/auth";
 
 export type LoginPayload = {
-  email: string;
+  email?: string;
+  groupId?: string;
+  facilityCode?: string;
+  username?: string;
   password: string;
 };
 

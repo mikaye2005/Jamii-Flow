@@ -5,7 +5,7 @@ export const createContributionPlanSchema = z.object({
   name: z.string().min(2).max(120),
   description: z.string().max(500).optional(),
   amountMinor: z.number().int().positive(),
-  currency: z.string().length(3).default("KES"),
+  currency: z.literal("KES").default("KES"),
   frequency: z.enum(["WEEKLY", "MONTHLY", "ONE_TIME"]),
   dueDay: z.number().int().min(1).max(31).optional(),
   graceDays: z.number().int().min(0).max(30).default(0),

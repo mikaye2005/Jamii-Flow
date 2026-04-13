@@ -1,11 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link, NavLink, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { logout } from "../features/auth/api";
 import { useAuth } from "../features/auth/useAuth";
 import { hasMinimumRole } from "../lib/permissions";
 
 const navItems = [
   { to: "/app/dashboard", label: "Dashboard", icon: "DB" },
+  { to: "/app/my-portal", label: "My Portal", icon: "ME" },
   { to: "/app/groups", label: "Groups", icon: "GR" },
   { to: "/app/members", label: "Members", icon: "MB" },
   { to: "/app/contributions", label: "Contributions", icon: "CT" },
@@ -16,6 +17,7 @@ const navItems = [
 ];
 
 export function AppLayout() {
+  const location = useLocation();
   const queryClient = useQueryClient();
   const authQuery = useAuth();
   const logoutMutation = useMutation({
@@ -26,6 +28,17 @@ export function AppLayout() {
   });
 
   const user = authQuery.data?.user;
+  const isPublicRoute =
+    location.pathname === "/" || location.pathname === "/login" || location.pathname === "/signup";
+
+  if (isPublicRoute) {
+    return (
+      <main className="content-area">
+        <Outlet />
+      </main>
+    );
+  }
+
   const filteredNavItems = navItems.filter((item) => {
     if (!user) {
       return false;
