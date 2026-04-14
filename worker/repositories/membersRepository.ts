@@ -13,6 +13,20 @@ export type MemberListRecord = {
   phone: string | null;
 };
 
+type CreateMemberOptions = {
+  passwordHash: string;
+  temporaryPassword: string;
+};
+
+export type CreateMemberResult = {
+  roleAssigned: "MEMBER" | "GROUP_ADMIN";
+  groupName: string;
+  groupCode: string;
+  firstName: string;
+  email: string;
+  temporaryPassword: string;
+};
+
 export async function listMembersByGroup(
   db: D1Database,
   groupId: string,
@@ -40,7 +54,20 @@ export async function listMembersByGroup(
   return result.results ?? [];
 }
 
-export async function createMemberWithMembership(db: D1Database, input: CreateMemberInput): Promise<void> {
+export async function createMemberWithMembership(
+  db: D1Database,
+  input: CreateMemberInput,
+  options: CreateMemberOptions,
+): Promise<CreateMemberResult | null> {
+  const roleAssigned = input.accountRole === "GROUP_ADMIN" ? "GROUP_ADMIN" : "MEMBER";
+  const group = await db
+    .prepare("SELECT id, name, code FROM groups WHERE id = ?1 LIMIT 1")
+    .bind(input.groupId)
+    .first<{ id: string; name: string; code: string }>();
+  if (!group) {
+    return null;
+  }
+
   const existing = await db
     .prepare("SELECT id FROM users WHERE lower(email) = lower(?1) LIMIT 1")
     .bind(input.email)
@@ -57,8 +84,7 @@ export async function createMemberWithMembership(db: D1Database, input: CreateMe
       .bind(
         userId,
         input.email.toLowerCase(),
-        // Temporary randomized password hash until invite/reset flow is built.
-        crypto.randomUUID().replace(/-/g, ""),
+        options.passwordHash,
         input.firstName,
         input.lastName,
         input.phone ?? null,
@@ -68,11 +94,40 @@ export async function createMemberWithMembership(db: D1Database, input: CreateMe
 
   await db
     .prepare(
-      `INSERT INTO group_memberships (id, group_id, user_id, member_number, membership_status)
+      `INSERT OR IGNORE INTO group_memberships (id, group_id, user_id, member_number, membership_status)
        VALUES (?1, ?2, ?3, ?4, 'ACTIVE')`,
     )
     .bind(crypto.randomUUID(), input.groupId, userId, `M-${Date.now()}`)
     .run();
+
+  await db
+    .prepare(
+      `INSERT OR IGNORE INTO group_user_roles (id, group_id, user_id, role, status)
+       VALUES (?1, ?2, ?3, ?4, 'ACTIVE')`,
+    )
+    .bind(crypto.randomUUID(), input.groupId, userId, roleAssigned)
+    .run();
+
+  await db
+    .prepare(
+      `INSERT INTO member_profiles (id, user_id, gender, address)
+       VALUES (?1, ?2, ?3, ?4)
+       ON CONFLICT(user_id) DO UPDATE SET
+         gender = COALESCE(excluded.gender, member_profiles.gender),
+         address = COALESCE(excluded.address, member_profiles.address),
+         updated_at = CURRENT_TIMESTAMP`,
+    )
+    .bind(crypto.randomUUID(), userId, input.gender ?? null, input.address ?? null)
+    .run();
+
+  return {
+    roleAssigned,
+    groupName: group.name,
+    groupCode: group.code,
+    firstName: input.firstName,
+    email: input.email.toLowerCase(),
+    temporaryPassword: options.temporaryPassword,
+  };
 }
 
 export async function updateMember(

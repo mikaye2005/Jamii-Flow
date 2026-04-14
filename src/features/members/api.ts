@@ -19,6 +19,10 @@ export type CreateMemberPayload = {
   firstName: string;
   lastName: string;
   phone?: string;
+  gender?: "MALE" | "FEMALE" | "OTHER";
+  address?: string;
+  accountRole?: "MEMBER" | "GROUP_ADMIN";
+  temporaryPassword?: string;
 };
 
 export function listMembers(groupId: string) {
@@ -26,5 +30,5 @@ export function listMembers(groupId: string) {
 }
 
 export function createMember(payload: CreateMemberPayload) {
-  return apiPost<{ created: boolean }, CreateMemberPayload>("/api/members", payload);
+  return apiPost<{ created: boolean; inviteEmailSent: boolean }, CreateMemberPayload>("/api/members", payload);
 }

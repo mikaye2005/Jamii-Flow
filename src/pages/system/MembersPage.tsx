@@ -14,6 +14,8 @@ const createMemberFormSchema = z.object({
   firstName: z.string().min(2, "First name is required."),
   lastName: z.string().min(2, "Last name is required."),
   phone: z.string().optional(),
+  gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(),
+  address: z.string().optional(),
 });
 
 type CreateMemberFormValues = z.infer<typeof createMemberFormSchema>;
@@ -33,6 +35,8 @@ export function MembersPage() {
       firstName: "",
       lastName: "",
       phone: "",
+      gender: "OTHER",
+      address: "",
     },
   });
 
@@ -57,6 +61,8 @@ export function MembersPage() {
         firstName: "",
         lastName: "",
         phone: "",
+        gender: "OTHER",
+        address: "",
       });
       await queryClient.invalidateQueries({ queryKey: ["members", selectedGroupId] });
     },
@@ -109,6 +115,18 @@ export function MembersPage() {
           <label>
             Phone
             <input {...register("phone")} />
+          </label>
+          <label>
+            Gender
+            <select {...register("gender")}>
+              <option value="OTHER">Prefer not to say</option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+            </select>
+          </label>
+          <label>
+            Address
+            <input {...register("address")} placeholder="Estate / town / county" />
           </label>
           <button className="button-primary" type="submit" disabled={createMemberMutation.isPending}>
             {createMemberMutation.isPending ? "Adding..." : "Add Member"}

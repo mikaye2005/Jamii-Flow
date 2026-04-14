@@ -7,7 +7,6 @@ import {
   listSignupGroups,
   loginWithMemberCredentials,
   loginWithEmailPassword,
-  registerMemberAccount,
   logoutBySessionToken,
 } from "../services/authService";
 import { fail } from "../utils/http";
@@ -76,21 +75,10 @@ authRoutes.post("/register", async (c) => {
     return fail(c, "Invalid signup payload.", 400, "INVALID_SIGNUP_PAYLOAD");
   }
 
-  const result = await registerMemberAccount(c.env.DB, parsed.data);
-  if ("error" in result) {
-    if (result.error === "EMAIL_ALREADY_EXISTS") {
-      return fail(c, "This email is already registered.", 409, "EMAIL_ALREADY_EXISTS");
-    }
-    return fail(c, "Selected group is not available.", 404, "GROUP_NOT_AVAILABLE");
-  }
-
-  setCookie(c, SESSION_COOKIE_NAME, result.sessionToken, {
-    httpOnly: true,
-    secure: new URL(c.req.url).protocol === "https:",
-    sameSite: "Lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7,
-  });
-
-  return ok(c, { user: result.authUser }, 201);
+  return fail(
+    c,
+    "Self-signup is disabled. A facility admin must create your profile and send your access email.",
+    403,
+    "SELF_SIGNUP_DISABLED",
+  );
 });

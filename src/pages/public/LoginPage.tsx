@@ -1,17 +1,40 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { listSignupGroups, login } from "../../features/auth/api";
 
-const loginSchema = z.object({
-  groupId: z.string().min(1, "Select your welfare group."),
-  facilityCode: z.string().min(2, "Facility code is required."),
-  username: z.string().min(2, "Username is required."),
-  password: z.string().min(8, "Password must have at least 8 characters."),
-});
+const loginSchema = z
+  .object({
+    mode: z.enum(["member", "admin"]),
+    email: z.string().optional(),
+    groupId: z.string().optional(),
+    facilityCode: z.string().optional(),
+    username: z.string().optional(),
+    password: z.string().min(8, "Password must have at least 8 characters."),
+  })
+  .superRefine((value, ctx) => {
+    if (value.mode === "admin") {
+      if (!value.email || !z.email().safeParse(value.email).success) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["email"],
+          message: "Enter a valid admin email.",
+        });
+      }
+      return;
+    }
+    if (!value.groupId) {
+      ctx.addIssue({ code: "custom", path: ["groupId"], message: "Select your welfare group." });
+    }
+    if (!value.facilityCode || value.facilityCode.length < 2) {
+      ctx.addIssue({ code: "custom", path: ["facilityCode"], message: "Facility code is required." });
+    }
+    if (!value.username || value.username.length < 2) {
+      ctx.addIssue({ code: "custom", path: ["username"], message: "Username is required." });
+    }
+  });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
@@ -23,16 +46,20 @@ export function LoginPage() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
+      mode: "member",
+      email: "",
       groupId: "",
       facilityCode: "",
       username: "",
       password: "",
     },
   });
+  const mode = watch("mode");
   const groupsQuery = useQuery({
     queryKey: ["login-groups"],
     queryFn: listSignupGroups,
@@ -48,6 +75,13 @@ export function LoginPage() {
   });
 
   const onSubmit = (values: LoginFormValues) => {
+    if (values.mode === "admin") {
+      loginMutation.mutate({
+        email: values.email?.trim(),
+        password: values.password,
+      });
+      return;
+    }
     loginMutation.mutate({
       groupId: values.groupId,
       facilityCode: values.facilityCode,
@@ -60,9 +94,9 @@ export function LoginPage() {
     <section className="auth-shell">
       <div className="auth-layout">
         <article className="card auth-info-panel">
-          <h2 className="section-title">Member Welfare Access</h2>
+          <h2 className="section-title">Welfare Access</h2>
           <p className="section-subtext">
-            Sign in to see your KES contributions, pending arrears, receipts, and admin updates.
+            Members sign in with facility credentials. Super Admin and facility admins use email and password.
           </p>
           <div className="auth-feature-list">
             <div className="auth-feature-item">
@@ -96,27 +130,44 @@ export function LoginPage() {
           </p>
           <form onSubmit={handleSubmit(onSubmit)} className="form-grid">
             <label>
-              Welfare Group
-              <select {...register("groupId")} aria-invalid={errors.groupId ? "true" : "false"}>
-                <option value="">Select group</option>
-                {(groupsQuery.data?.groups ?? []).map((group) => (
-                  <option key={group.id} value={group.id}>
-                    {group.name}
-                  </option>
-                ))}
+              Login Type
+              <select {...register("mode")}>
+                <option value="member">Member Login</option>
+                <option value="admin">Super Admin / Facility Admin</option>
               </select>
-              {errors.groupId ? <small className="text-danger">{errors.groupId.message}</small> : null}
             </label>
-            <label>
-              Facility Code
-              <input {...register("facilityCode")} aria-invalid={errors.facilityCode ? "true" : "false"} />
-              {errors.facilityCode ? <small className="text-danger">{errors.facilityCode.message}</small> : null}
-            </label>
-            <label>
-              Username
-              <input {...register("username")} aria-invalid={errors.username ? "true" : "false"} />
-              {errors.username ? <small className="text-danger">{errors.username.message}</small> : null}
-            </label>
+            {mode === "admin" ? (
+              <label>
+                Admin Email
+                <input type="email" {...register("email")} aria-invalid={errors.email ? "true" : "false"} />
+                {errors.email ? <small className="text-danger">{errors.email.message}</small> : null}
+              </label>
+            ) : (
+              <>
+                <label>
+                  Welfare Group
+                  <select {...register("groupId")} aria-invalid={errors.groupId ? "true" : "false"}>
+                    <option value="">Select group</option>
+                    {(groupsQuery.data?.groups ?? []).map((group) => (
+                      <option key={group.id} value={group.id}>
+                        {group.name}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.groupId ? <small className="text-danger">{errors.groupId.message}</small> : null}
+                </label>
+                <label>
+                  Facility Code
+                  <input {...register("facilityCode")} aria-invalid={errors.facilityCode ? "true" : "false"} />
+                  {errors.facilityCode ? <small className="text-danger">{errors.facilityCode.message}</small> : null}
+                </label>
+                <label>
+                  Username
+                  <input {...register("username")} aria-invalid={errors.username ? "true" : "false"} />
+                  {errors.username ? <small className="text-danger">{errors.username.message}</small> : null}
+                </label>
+              </>
+            )}
             <label>
               Password
               <input type="password" {...register("password")} aria-invalid={errors.password ? "true" : "false"} />
@@ -129,11 +180,11 @@ export function LoginPage() {
             </button>
             {loginMutation.isError ? (
               <small className="text-danger">
-                Login failed. Check group, facility code, username, and password.
+                Login failed. Check your details and try again.
               </small>
             ) : null}
             <small style={{ color: "var(--color-muted)" }}>
-              New member? <Link to="/signup">Create an account</Link> | Admin can use email login API if needed.
+              Member accounts are created by facility admins. Super Admin creates facility admin accounts.
             </small>
           </form>
         </article>
